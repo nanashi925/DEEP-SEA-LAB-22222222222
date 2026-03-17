@@ -1,0 +1,792 @@
+(function () {
+  'use strict';
+
+  // ===== Dialogue Data =====
+  var dialogue = {
+    a: [
+      'おっ、お嬢ちゃん来たか！待ってたぞー！',
+      'なあなあ、この深海魚見たか？デカくないか？',
+      'ここのコーヒー、私が淹れたんだぞ。飲むか？',
+      'ラボの掃除？……えー、明日でよくないか？',
+      'お嬢ちゃん、今日なんかいい感じだな！なんかあったか？',
+      'じゃあこうしようぜ！とりあえず座れ座れ！',
+      'ほら、ソファ空いてるぞ！遠慮すんなって！',
+      '私に任せとけ！……何をとは言わんけど！',
+      'いやー今日も平和だなー！最高！',
+      'お嬢ちゃんが来るとさ、なんかラボが明るくなるんだよな！',
+      'おっ、腹減ってないか？Cに作らせようぜ！',
+      'この水槽さぁ、ずっと見てると眠くならないか？私はなる！',
+      'お嬢ちゃん、難しい顔すんなって！なんとかなるって！',
+      'Bがまた小難しいこと言ってたけど、たぶん要するに大丈夫ってことだ！',
+      'Cが黙ってるとカッコいいけど、あれ実は寝てるだけの時あるからな！',
+      '深海って暗いだろ？だから私が明るくしてんだよ！……うまくないか？',
+      'よーし、今日もいっちょやるかー！……何をやるかは今から考える！',
+      'お嬢ちゃんが来ない日はさ、正直ちょっとヒマなんだよな。',
+      'おいおい、そんな隅っこにいないでこっち来いって！',
+      'あーっ、それ面白そうじゃん！ちょっとやってみようぜ！',
+    ],
+    b: [
+      '……来たか、お嬢。今ちょうどデータを整理していたところだ。',
+      '水温が0.3度上昇している。些細だが、記録しておくべきだろう。',
+      '報告書はまとめてある。必要ならいつでも言ってくれ。',
+      '焦る必要はない。順を追って確認しよう。',
+      '……静かだな。こういう時間は嫌いではない。',
+      '観測データに気になる点がある。お嬢、少し見るか。',
+      'Aがまた騒いでいたが……まあ、いつものことだ。',
+      '効率を考えるなら、まず現状を正確に把握することだ。',
+      'お嬢、気になることがあるなら聞こう。',
+      '問題は切り分けて対処する。それが基本だ。',
+      '深海では、想定外の反応が起きる。……実に興味深い。',
+      '記録は正確に。曖昧な情報が一番厄介だ。',
+      'Aの発想は荒削りだが、時折本質を突く。認めざるを得ない。',
+      'Cは多くを語らないが、見るべき所は見ている。……信頼に足る。',
+      '休憩も計画のうちだ。お嬢、少し座ったらどうだ。',
+      'この観測機器の精度は悪くない。だが、検証は怠らない方がいい。',
+      '……私が整理しておく。お嬢は自分のペースで構わない。',
+      '感情で決めるなとは言わない。だが、事実も並べてから判断すべきだ。',
+      '……不思議だな。お嬢が来ると、ラボの空気が少し変わる。',
+      '結論を急ぐ必要はない。材料が揃えば、答えは自ずと見える。',
+    ],
+    c: [
+      '……よく来たな、お嬢。',
+      '焦るな。まだ崩れちゃいない。',
+      '順番を守れ。それだけでうまくいく。',
+      '……ここは俺が見ている。安心しろ。',
+      '騒がしいのは嫌いじゃない。……少しだけな。',
+      'お嬢、今日は少し休め。明日もあるだろう。',
+      '……考えすぎるな。答えは動いた先にある。',
+      '全体を見ろ。部分に囚われるな。',
+      'Aの言うことも、たまには当たる。……たまにはな。',
+      '……ここにいる間は、俺たちが守る。',
+      '深海は静かだ。……だが、その静けさの中に全部ある。',
+      '慌てるな。手順通りにやれば、崩れるもんも崩れない。',
+      '……お嬢、顔に出てるぞ。何があった。',
+      'Aがうるさい？……あれでもだいぶ抑えてる方だ。',
+      'Bの分析は正確だ。あいつが大丈夫と言うなら、大丈夫だろう。',
+      '……言葉にしなくていい。ここにいろ。',
+      '迷った時は止まれ。止まって、周りを見ろ。それだけだ。',
+      '俺は細かいことは言わない。……ただ、無茶はするなよ。',
+      '……今日の海は穏やかだな。こういう日は悪くない。',
+      'お嬢が頑張ってるのは、見てりゃわかる。……だから、たまには力を抜け。',
+    ],
+  };
+
+  // ===== State =====
+  var currentRoom = 'living-room';
+  var bubbleTimer = null;
+
+  // ===== DOM refs =====
+  var roomBg = document.getElementById('room-bg');
+  var viewport = document.getElementById('room-viewport');
+  var bubble = document.getElementById('speech-bubble');
+  var speechText = document.getElementById('speech-text');
+  var roomButtons = document.querySelectorAll('.room-btn');
+  var characters = document.querySelectorAll('.character');
+
+  // ===== Room backgrounds (relative paths) =====
+  var roomBgMap = {
+    'living-room': 'public/assets/maps/living-room.png',
+    'control-room': 'public/assets/maps/control-room.png',
+  };
+
+  // ===== Helpers =====
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // ===== Speech Bubble =====
+  function showBubble(charId, charEl) {
+    if (bubbleTimer) {
+      clearTimeout(bubbleTimer);
+      bubbleTimer = null;
+    }
+
+    var lines = dialogue[charId];
+    if (!lines) return;
+    var line = pickRandom(lines);
+
+    speechText.textContent = line;
+    bubble.className = 'bubble-' + charId;
+
+    var vpRect = viewport.getBoundingClientRect();
+    var charRect = charEl.getBoundingClientRect();
+
+    var charCenterX = charRect.left + charRect.width / 2 - vpRect.left;
+    var charTopY = charRect.top - vpRect.top;
+
+    var leftPx = charCenterX - 140;
+    var topPx = charTopY - 10;
+
+    var clampedLeft = Math.max(8, Math.min(leftPx, vpRect.width - 288));
+
+    bubble.style.left = clampedLeft + 'px';
+    bubble.style.bottom = 'auto';
+    bubble.style.top = topPx + 'px';
+    bubble.style.transform = 'translateY(-100%)';
+
+    var triangleLeft = charCenterX - clampedLeft - 10;
+    bubble.style.setProperty('--tri-left', Math.max(15, Math.min(triangleLeft, 250)) + 'px');
+
+    requestAnimationFrame(function () {
+      bubble.classList.remove('hidden');
+    });
+
+    bubbleTimer = setTimeout(function () {
+      bubble.classList.add('hidden');
+      bubbleTimer = null;
+    }, 4000);
+  }
+
+  // ===== Room Switching =====
+  function switchRoom(roomId) {
+    if (roomId === currentRoom) return;
+
+    currentRoom = roomId;
+
+    roomButtons.forEach(function (btn) {
+      btn.classList.toggle('active', btn.dataset.room === roomId);
+    });
+
+    roomBg.classList.add('fade-out');
+
+    bubble.classList.add('hidden');
+    if (bubbleTimer) {
+      clearTimeout(bubbleTimer);
+      bubbleTimer = null;
+    }
+
+    setTimeout(function () {
+      roomBg.src = roomBgMap[roomId];
+      viewport.className = '';
+      viewport.classList.add('room-' + roomId);
+      roomBg.classList.remove('fade-out');
+    }, 400);
+  }
+
+  // ===== Event Listeners =====
+  characters.forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      showBubble(el.dataset.char, el);
+    });
+  });
+
+  roomButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      switchRoom(btn.dataset.room);
+    });
+  });
+
+  viewport.addEventListener('click', function (e) {
+    if (!e.target.closest('.character')) {
+      bubble.classList.add('hidden');
+      if (bubbleTimer) {
+        clearTimeout(bubbleTimer);
+        bubbleTimer = null;
+      }
+    }
+  });
+
+  // ===== Theme Song (BGM) =====
+  var themeSong = document.getElementById('theme-song');
+  var themeVolume = 1.0;
+  var themeFadeTimer = null;
+  var mediaIsPlaying = false;
+
+  // ===== Splash Screen =====
+  var splash = document.getElementById('splash');
+  var splashContent = document.getElementById('splash-content');
+  var noiseCanvas = document.getElementById('noise-canvas');
+  var splashDismissed = false;
+
+  function drawNoise(ctx, w, h, alpha) {
+    var imgData = ctx.createImageData(w, h);
+    var d = imgData.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var v = Math.random() * 255;
+      d[i] = v;
+      d[i + 1] = v;
+      d[i + 2] = v;
+      d[i + 3] = alpha;
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  function dismissSplash() {
+    if (splashDismissed) return;
+    splashDismissed = true;
+    splash.classList.add('dismissed');
+
+    // Phase 1: Logo glitch animation (CSS handles this)
+    splashContent.classList.add('glitch');
+
+    // Setup noise canvas
+    var ctx = noiseCanvas.getContext('2d');
+    var scale = 4;
+    noiseCanvas.width = Math.ceil(window.innerWidth / scale);
+    noiseCanvas.height = Math.ceil(window.innerHeight / scale);
+    ctx.imageSmoothingEnabled = false;
+
+    // Timeline:
+    // 0-400ms:   Logo glitches, noise starts building (splash still visible)
+    // 400-800ms: Splash fades out, noise peaks (covers everything)
+    // 800-1600ms: Noise gradually clears, revealing the lab behind
+    var totalDuration = 1600;
+    var startTime = performance.now();
+
+    function animateTransition(now) {
+      var elapsed = now - startTime;
+      var progress = Math.min(elapsed / totalDuration, 1);
+
+      var alpha;
+      if (progress < 0.25) {
+        // Phase 1: Noise builds up (0 → 255)
+        alpha = (progress / 0.25) * 255;
+        noiseCanvas.style.opacity = 1;
+      } else if (progress < 0.5) {
+        // Phase 2: Noise at peak, splash fading behind it
+        alpha = 255;
+        noiseCanvas.style.opacity = 1;
+      } else {
+        // Phase 3: Noise fades out, lab revealed
+        var fadeProgress = (progress - 0.5) / 0.5;
+        alpha = (1 - fadeProgress) * 255;
+        noiseCanvas.style.opacity = 1;
+      }
+
+      drawNoise(ctx, noiseCanvas.width, noiseCanvas.height, Math.floor(Math.max(0, alpha)));
+
+      // Remove splash at the noise peak so lab is behind the noise
+      if (progress >= 0.35 && splash.style.display !== 'none') {
+        splash.style.display = 'none';
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(animateTransition);
+      } else {
+        // All done, clean up
+        noiseCanvas.style.opacity = 0;
+        noiseCanvas.style.display = 'none';
+      }
+    }
+    requestAnimationFrame(animateTransition);
+
+    // Start BGM with fade in (slightly delayed so it syncs with lab reveal)
+    setTimeout(function () {
+      themeSong.volume = 0;
+      themeSong.play().then(function () {
+        fadeThemeSong(themeVolume, 1500);
+      }).catch(function () {});
+    }, 300);
+  }
+
+  splash.addEventListener('click', dismissSplash);
+  splash.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    dismissSplash();
+  });
+
+  // Fade theme song volume
+  function fadeThemeSong(targetVol, duration, callback) {
+    if (themeFadeTimer) cancelAnimationFrame(themeFadeTimer);
+    var startVol = themeSong.volume;
+    var startTime = performance.now();
+
+    function step(now) {
+      var elapsed = now - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      themeSong.volume = startVol + (targetVol - startVol) * progress;
+      if (progress < 1) {
+        themeFadeTimer = requestAnimationFrame(step);
+      } else {
+        themeSong.volume = targetVol;
+        themeFadeTimer = null;
+        if (targetVol === 0) themeSong.pause();
+        if (callback) callback();
+      }
+    }
+    if (themeSong.paused && targetVol > 0) {
+      themeSong.volume = 0;
+      themeSong.play().catch(function () {});
+    }
+    themeFadeTimer = requestAnimationFrame(step);
+  }
+
+  // ===== Media Player =====
+  var mediaTabs = document.querySelectorAll('.media-tab');
+  var mediaInputs = document.querySelectorAll('.media-input-content');
+  var mediaPlayer = document.getElementById('media-player');
+  var playerContainer = document.getElementById('player-container');
+  var urlInput = document.getElementById('url-input');
+  var urlSubmit = document.getElementById('url-submit');
+  var mediaClose = document.getElementById('media-close');
+  var videoFileInput = document.getElementById('video-file-input');
+  var photoFileInput = document.getElementById('photo-file-input');
+  var genericFileInput = document.getElementById('generic-file-input');
+
+  // Media reaction comments (generic, not about specific content)
+  var mediaReactions = {
+    a: [
+      'おっ、何か始まるのか！？',
+      'お、再生するぞ！みんな注目ー！',
+      'わくわくするなあ！何だろ！',
+      'ほほー、ちょっと見てみようぜ！',
+      'おお！いいねいいね！',
+      'よーし、鑑賞タイムだ！',
+      'お嬢ちゃんのチョイスか！楽しみだ！',
+    ],
+    b: [
+      '……再生するのか。見てみよう。',
+      'ふむ、確認しよう。',
+      '……少し気になるな。再生してくれ。',
+      'データの一種だと思えば、確認は必要だ。',
+      '了解した。視聴しよう。',
+      '……お嬢のセレクトか。悪くない。',
+    ],
+    c: [
+      '……再生しろ。',
+      '……聞いてやる。',
+      'ふん……見てみるか。',
+      '……静かにしろ。始まるぞ。',
+      '……お嬢が選んだなら、見る価値はあるだろう。',
+      '……いいだろう。付き合ってやる。',
+    ],
+  };
+
+  // Tab switching
+  mediaTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      mediaTabs.forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+
+      var type = tab.dataset.type;
+      mediaInputs.forEach(function (input) { input.classList.add('hidden'); });
+      document.getElementById('input-' + type).classList.remove('hidden');
+    });
+  });
+
+  // Show character reaction when media plays
+  function triggerMediaReaction() {
+    var charIds = ['a', 'b', 'c'];
+    var chosen = pickRandom(charIds);
+    var charEl = document.getElementById('char-' + chosen);
+    var lines = mediaReactions[chosen];
+    var line = pickRandom(lines);
+
+    if (bubbleTimer) {
+      clearTimeout(bubbleTimer);
+      bubbleTimer = null;
+    }
+
+    speechText.textContent = line;
+    bubble.className = 'bubble-' + chosen;
+
+    var vpRect = viewport.getBoundingClientRect();
+    var charRect = charEl.getBoundingClientRect();
+
+    var charCenterX = charRect.left + charRect.width / 2 - vpRect.left;
+    var charTopY = charRect.top - vpRect.top;
+
+    var leftPx = charCenterX - 140;
+    var topPx = charTopY - 10;
+
+    var clampedLeft = Math.max(8, Math.min(leftPx, vpRect.width - 288));
+
+    bubble.style.left = clampedLeft + 'px';
+    bubble.style.bottom = 'auto';
+    bubble.style.top = topPx + 'px';
+    bubble.style.transform = 'translateY(-100%)';
+
+    var triangleLeft = charCenterX - clampedLeft - 10;
+    bubble.style.setProperty('--tri-left', Math.max(15, Math.min(triangleLeft, 250)) + 'px');
+
+    requestAnimationFrame(function () {
+      bubble.classList.remove('hidden');
+    });
+
+    bubbleTimer = setTimeout(function () {
+      bubble.classList.add('hidden');
+      bubbleTimer = null;
+    }, 4000);
+  }
+
+  // Parse URL to determine media type
+  function parseMediaUrl(url) {
+    // YouTube
+    var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) return { type: 'youtube', id: ytMatch[1] };
+
+    // SUNO AI - extract UUID from various URL patterns
+    if (url.indexOf('suno.com') !== -1 || url.indexOf('suno.ai') !== -1) {
+      // Match UUID pattern in URL: /song/UUID or /s/SHORT_ID
+      var sunoUuid = url.match(/\/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (sunoUuid) {
+        return { type: 'suno', audioUrl: 'https://cdn1.suno.ai/' + sunoUuid[1] + '.mp3' };
+      }
+      // Short URL /s/ID - try to use as-is via audio (won't work directly, but provide fallback)
+      var sunoShort = url.match(/\/s\/([a-zA-Z0-9_-]+)/);
+      if (sunoShort) {
+        return { type: 'suno-short', url: url };
+      }
+      return { type: 'suno-short', url: url };
+    }
+
+    // Direct media file URLs
+    var lower = url.toLowerCase();
+    if (lower.match(/\.(mp4|webm|ogv|mov)(\?|$)/)) return { type: 'video-url', url: url };
+    if (lower.match(/\.(mp3|wav|ogg|flac|aac|m4a)(\?|$)/)) return { type: 'audio-url', url: url };
+    if (lower.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/)) return { type: 'image-url', url: url };
+
+    // Unknown URL - try as iframe
+    return { type: 'iframe', url: url };
+  }
+
+  // Display media in player (with theme song fade-out for audio/video)
+  function showMedia(html, muteTheme) {
+    if (muteTheme === undefined) muteTheme = true;
+    if (muteTheme) {
+      mediaIsPlaying = true;
+      // Fade out theme song over 0.8s, then show media
+      fadeThemeSong(0, 800, function () {
+        playerContainer.innerHTML = html;
+        mediaPlayer.classList.remove('hidden');
+        triggerMediaReaction();
+        // Listen for media end to resume theme song
+        var mediaEl = playerContainer.querySelector('video, audio');
+        if (mediaEl) {
+          mediaEl.addEventListener('ended', function () {
+            resumeThemeSong();
+          });
+        }
+      });
+    } else {
+      // Show media without stopping theme song (e.g. images)
+      playerContainer.innerHTML = html;
+      mediaPlayer.classList.remove('hidden');
+      triggerMediaReaction();
+    }
+  }
+
+  function resumeThemeSong() {
+    mediaIsPlaying = false;
+    fadeThemeSong(themeVolume, 800);
+  }
+
+  function closeMedia() {
+    // Stop any playing media
+    var mediaEl = playerContainer.querySelector('video, audio');
+    if (mediaEl) {
+      mediaEl.pause();
+      mediaEl.src = '';
+    }
+    // Remove iframes
+    var iframes = playerContainer.querySelectorAll('iframe');
+    iframes.forEach(function (f) { f.src = ''; });
+
+    mediaPlayer.classList.add('hidden');
+    playerContainer.innerHTML = '';
+    if (mediaIsPlaying) {
+      resumeThemeSong();
+    }
+  }
+
+  // Sanitize URL for HTML attribute
+  function escAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // URL submit
+  urlSubmit.addEventListener('click', function () {
+    var url = urlInput.value.trim();
+    if (!url) return;
+
+    var parsed = parseMediaUrl(url);
+
+    if (parsed.type === 'youtube') {
+      showMedia('<iframe src="https://www.youtube.com/embed/' + escAttr(parsed.id) + '?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>');
+    } else if (parsed.type === 'suno') {
+      // SUNO AI with UUID - play via CDN audio URL
+      showMedia('<audio controls autoplay src="' + escAttr(parsed.audioUrl) + '"></audio>');
+    } else if (parsed.type === 'suno-short') {
+      // SUNO AI short URL - open in iframe as fallback
+      showMedia('<iframe src="' + escAttr(parsed.url) + '" allow="autoplay" allowfullscreen></iframe>');
+    } else if (parsed.type === 'video-url') {
+      showMedia('<video controls autoplay playsinline src="' + escAttr(url) + '"></video>');
+    } else if (parsed.type === 'audio-url') {
+      showMedia('<audio controls autoplay src="' + escAttr(url) + '"></audio>');
+    } else if (parsed.type === 'image-url') {
+      showMedia('<img src="' + escAttr(url) + '" alt="投稿画像" />', false);
+    } else {
+      showMedia('<iframe src="' + escAttr(url) + '" allow="autoplay" allowfullscreen></iframe>');
+    }
+
+    urlInput.value = '';
+  });
+
+  // Enter key on URL input
+  urlInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') urlSubmit.click();
+  });
+
+  // Close button
+  mediaClose.addEventListener('click', closeMedia);
+
+  // File inputs
+  function handleFileSelect(file) {
+    if (!file) return;
+    var objUrl = URL.createObjectURL(file);
+    var type = file.type;
+
+    if (type.indexOf('video') === 0) {
+      showMedia('<video controls autoplay playsinline src="' + objUrl + '"></video>');
+    } else if (type.indexOf('audio') === 0) {
+      showMedia('<audio controls autoplay src="' + objUrl + '"></audio>');
+    } else if (type.indexOf('image') === 0) {
+      showMedia('<img src="' + objUrl + '" alt="投稿画像" />', false);
+    } else {
+      showMedia('<p style="color:#6880a0;padding:20px;text-align:center;">このファイル形式は再生できません</p>');
+    }
+  }
+
+  videoFileInput.addEventListener('change', function () {
+    handleFileSelect(this.files[0]);
+    this.value = '';
+  });
+
+  photoFileInput.addEventListener('change', function () {
+    handleFileSelect(this.files[0]);
+    this.value = '';
+  });
+
+  genericFileInput.addEventListener('change', function () {
+    handleFileSelect(this.files[0]);
+    this.value = '';
+  });
+
+  // ===== Members Section =====
+  (function initMembers() {
+    var cover = document.getElementById('members-cover');
+    var carousel = document.getElementById('members-carousel');
+    var tapBtn = document.getElementById('members-tap');
+    var noiseEl = document.getElementById('members-noise');
+    var slides = document.querySelectorAll('.member-slide');
+    var dots = document.querySelectorAll('.members-dot');
+    var prevBtn = document.getElementById('members-prev');
+    var nextBtn = document.getElementById('members-next');
+    if (!cover || !carousel) return;
+
+    var currentSlide = 0;
+    var totalSlides = slides.length;
+
+    function showSlide(index) {
+      slides.forEach(function (s) { s.classList.remove('active'); });
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === index); });
+      currentSlide = index;
+      slides[currentSlide].classList.add('active');
+    }
+
+    // Noise transition helper
+    function noiseTransition(onPeak, onDone) {
+      var section = document.getElementById('members-section');
+      var w = section.offsetWidth;
+      var h = section.offsetHeight;
+      var scale = 4;
+      noiseEl.width = Math.ceil(w / scale);
+      noiseEl.height = Math.ceil(h / scale);
+      noiseEl.style.width = w + 'px';
+      noiseEl.style.height = h + 'px';
+      noiseEl.classList.remove('hidden');
+
+      var ctx = noiseEl.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      var duration = 800;
+      var start = performance.now();
+
+      function frame(now) {
+        var progress = Math.min((now - start) / duration, 1);
+        var alpha;
+        if (progress < 0.4) {
+          alpha = (progress / 0.4) * 255;
+        } else if (progress < 0.6) {
+          alpha = 255;
+        } else {
+          alpha = (1 - (progress - 0.6) / 0.4) * 255;
+        }
+        // Draw noise
+        var imgData = ctx.createImageData(noiseEl.width, noiseEl.height);
+        var d = imgData.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var v = Math.random() * 255;
+          d[i] = v; d[i + 1] = v; d[i + 2] = v;
+          d[i + 3] = Math.floor(Math.max(0, alpha));
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        if (progress >= 0.4 && progress < 0.6 && onPeak) {
+          onPeak();
+          onPeak = null; // only once
+        }
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          noiseEl.classList.add('hidden');
+          if (onDone) onDone();
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // TAP → noise → show carousel
+    tapBtn.addEventListener('click', function () {
+      noiseTransition(function () {
+        cover.classList.add('hidden');
+        carousel.classList.remove('hidden');
+        showSlide(0);
+      });
+    });
+
+    // Prev: loop through slides (does NOT go back to cover)
+    prevBtn.addEventListener('click', function () {
+      showSlide((currentSlide - 1 + totalSlides) % totalSlides);
+    });
+
+    // Next: loop through slides
+    nextBtn.addEventListener('click', function () {
+      showSlide((currentSlide + 1) % totalSlides);
+    });
+
+    // Dot navigation
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        var idx = parseInt(dot.dataset.index, 10);
+        if (idx !== currentSlide) showSlide(idx);
+      });
+    });
+
+    // Back button → return to cover
+    var backBtn = document.getElementById('members-back');
+    if (backBtn) {
+      backBtn.addEventListener('click', function () {
+        noiseTransition(function () {
+          carousel.classList.add('hidden');
+          cover.classList.remove('hidden');
+        });
+      });
+    }
+
+    // Swipe support
+    var touchStartX = 0;
+    var isSwiping = false;
+
+    carousel.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+      isSwiping = false;
+    }, { passive: true });
+
+    carousel.addEventListener('touchmove', function (e) {
+      if (Math.abs(e.changedTouches[0].screenX - touchStartX) > 20) isSwiping = true;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', function (e) {
+      if (!isSwiping) return;
+      var diff = touchStartX - e.changedTouches[0].screenX;
+      if (diff > 40) nextBtn.click();
+      else if (diff < -40) prevBtn.click();
+    }, { passive: true });
+  })();
+
+  // ===== About Overlay =====
+  (function initAbout() {
+    var btn = document.getElementById('about-btn');
+    var overlay = document.getElementById('about-overlay');
+    var backBtn = document.getElementById('about-back');
+    if (!btn || !overlay) return;
+
+    function openAbout() {
+      overlay.classList.remove('hidden');
+      // Trigger reflow so transition fires
+      void overlay.offsetWidth;
+      overlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAbout() {
+      overlay.classList.remove('visible');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        overlay.classList.add('hidden');
+      }, 500);
+    }
+
+    btn.addEventListener('click', openAbout);
+    backBtn.addEventListener('click', closeAbout);
+
+    // Close on overlay background click
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeAbout();
+    });
+  })();
+
+  // ===== Links Carousel =====
+  (function initLinksCarousel() {
+    var cards = document.querySelectorAll('.links-card');
+    var dots = document.querySelectorAll('.links-dot');
+    var prevBtn = document.getElementById('links-prev');
+    var nextBtn = document.getElementById('links-next');
+    var carousel = document.getElementById('links-carousel');
+    if (!cards.length) return;
+
+    var currentIndex = 0;
+    var totalCards = cards.length;
+    var touchStartX = 0;
+    var isSwiping = false;
+
+    function showCard(index) {
+      cards.forEach(function (card) { card.classList.remove('active'); });
+      dots.forEach(function (dot, i) { dot.classList.toggle('active', i === index); });
+      currentIndex = index;
+      cards[currentIndex].classList.add('active');
+    }
+
+    function nextCard() { showCard((currentIndex + 1) % totalCards); }
+    function prevCard() { showCard((currentIndex - 1 + totalCards) % totalCards); }
+
+    // Arrow buttons
+    prevBtn.addEventListener('click', prevCard);
+    nextBtn.addEventListener('click', nextCard);
+
+    // Dot navigation
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        var idx = parseInt(dot.dataset.index, 10);
+        if (idx !== currentIndex) showCard(idx);
+      });
+    });
+
+    // Swipe on whole carousel
+    carousel.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+      isSwiping = false;
+    }, { passive: true });
+
+    carousel.addEventListener('touchmove', function (e) {
+      var dx = Math.abs(e.changedTouches[0].screenX - touchStartX);
+      if (dx > 20) isSwiping = true;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', function (e) {
+      if (!isSwiping) return;
+      var diff = touchStartX - e.changedTouches[0].screenX;
+      if (diff > 40) nextCard();
+      else if (diff < -40) prevCard();
+    }, { passive: true });
+
+    // Block link clicks during swipe
+    carousel.addEventListener('click', function (e) {
+      if (isSwiping) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  })();
+})();
