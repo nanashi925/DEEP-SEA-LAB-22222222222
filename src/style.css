@@ -1159,3 +1159,192 @@ body {
     font-size: 12px;
   }
 }
+
+/* ===== Yoimiya Kairi Section ===== */
+#kairi-section {
+  width: 100%;
+  margin-top: 20px;
+  position: relative;
+}
+
+#kairi-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#kairi-cover.hidden {
+  display: none;
+}
+
+#kairi-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #aeb4c2;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+#kairi-banner {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 2px solid #2f3540;
+  display: block;
+}
+
+#kairi-tap {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 0.5em;
+  color: #9ea5b5;
+  cursor: pointer;
+  animation: tap-pulse 2s ease-in-out infinite;
+  padding: 8px 0;
+}
+
+#kairi-noise {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+#kairi-noise.hidden {
+  display: none;
+}
+
+#kairi-carousel {
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  user-select: none;
+}
+
+#kairi-carousel.hidden {
+  display: none;
+}
+
+.member-color-kairi h3 {
+  color: #aeb4c2;
+}
+
+#kairi-detail-btn {
+  margin-top: 12px;
+  align-self: flex-start;
+  border: 1px solid #aeb4c2;
+  color: #d6d9de;
+  background: rgba(174, 180, 194, 0.12);
+  padding: 6px 14px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+#kairi-detail-btn:hover {
+  background: rgba(174, 180, 194, 0.24);
+  box-shadow: 0 0 10px rgba(174, 180, 194, 0.4);
+}
+
+#kairi-detail-btn:active {
+  transform: translateY(1px);
+}
+
+#kairi-back {
+  font-size: 8px;
+  padding: 8px 12px;
+  letter-spacing: 1px;
+}
+
+#kairi-about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 12px;
+  background: rgba(4, 6, 14, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.5s ease, backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease;
+}
+
+#kairi-about-overlay.hidden {
+  display: none;
+}
+
+#kairi-about-overlay.visible {
+  background: rgba(6, 6, 10, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#kairi-about-panel {
+  width: min(680px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  border: 1px solid #3f4654;
+  border-radius: 12px;
+  padding: 20px 16px 18px;
+  background: linear-gradient(180deg, rgba(20, 20, 24, 0.96) 0%, rgba(10, 10, 12, 0.98) 100%);
+  box-shadow: 0 0 0 1px rgba(174, 180, 194, 0.14), 0 20px 60px rgba(0, 0, 0, 0.6);
+  transform: translateY(16px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+#kairi-about-overlay.visible #kairi-about-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+#kairi-about-title {
+  color: #8a9ab8;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+}
+
+#kairi-about-line {
+  margin-top: 8px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #aeb4c2, transparent);
+}
+
+#kairi-about-body {
+  margin-top: 14px;
+}
+
+#kairi-about-body p {
+  color: #8a9ab8;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-bottom: 12px;
+}
+
+#kairi-about-body a {
+  color: #c8c8c8;
+}
+
+#kairi-about-body .kairi-soft-pink {
+  color: #f0b7cf;
+}
+
+
+#kairi-about-back {
+  border: 1px solid #aeb4c2;
+  color: #d6d9de;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: 8px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
