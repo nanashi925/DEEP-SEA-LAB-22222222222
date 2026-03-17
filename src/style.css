@@ -1308,7 +1308,7 @@ body {
 }
 
 #kairi-about-title {
-  color: #3a7cff;
+  color: #8a9ab8;
   font-size: 20px;
   letter-spacing: 0.04em;
 }
@@ -1324,14 +1324,18 @@ body {
 }
 
 #kairi-about-body p {
-  color: #3a7cff;
+  color: #8a9ab8;
   font-size: 14px;
   line-height: 1.9;
   margin-bottom: 12px;
 }
 
 #kairi-about-body a {
-  color: #aeb4c2;
+  color: #c8c8c8;
+}
+
+#kairi-about-body .kairi-soft-pink {
+  color: #f0b7cf;
 }
 
 
