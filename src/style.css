@@ -1308,7 +1308,7 @@ body {
 }
 
 #kairi-about-title {
-  color: #d6d9de;
+  color: #3a7cff;
   font-size: 20px;
   letter-spacing: 0.04em;
 }
@@ -1324,25 +1324,16 @@ body {
 }
 
 #kairi-about-body p {
-  color: #d2d6dc;
+  color: #3a7cff;
   font-size: 14px;
   line-height: 1.9;
   margin-bottom: 12px;
 }
 
 #kairi-about-body a {
-  color: #f0b7cf;
+  color: #aeb4c2;
 }
 
-#kairi-about-body .kairi-color-note {
-  color: #c2c6ce;
-  font-weight: bold;
-}
-
-#kairi-about-body .user-color-note {
-  color: #f0b7cf;
-  font-weight: bold;
-}
 
 #kairi-about-back {
   border: 1px solid #aeb4c2;
