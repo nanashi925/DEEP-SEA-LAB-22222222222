@@ -569,12 +569,12 @@
     var carousel = document.getElementById('members-carousel');
     var tapBtn = document.getElementById('members-tap');
     var noiseEl = document.getElementById('members-noise');
-    var slides = document.querySelectorAll('.member-slide');
-    var dots = document.querySelectorAll('.members-dot');
     var prevBtn = document.getElementById('members-prev');
     var nextBtn = document.getElementById('members-next');
     if (!cover || !carousel) return;
 
+    var slides = carousel.querySelectorAll('.member-slide');
+    var dots = carousel.querySelectorAll('.members-dot');
     var currentSlide = 0;
     var totalSlides = slides.length;
 
