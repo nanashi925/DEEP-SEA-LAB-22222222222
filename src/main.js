@@ -569,12 +569,12 @@
     var carousel = document.getElementById('members-carousel');
     var tapBtn = document.getElementById('members-tap');
     var noiseEl = document.getElementById('members-noise');
-    var slides = document.querySelectorAll('.member-slide');
-    var dots = document.querySelectorAll('.members-dot');
     var prevBtn = document.getElementById('members-prev');
     var nextBtn = document.getElementById('members-next');
     if (!cover || !carousel) return;
 
+    var slides = carousel.querySelectorAll('.member-slide');
+    var dots = carousel.querySelectorAll('.members-dot');
     var currentSlide = 0;
     var totalSlides = slides.length;
 
@@ -693,6 +693,109 @@
       if (diff > 40) nextBtn.click();
       else if (diff < -40) prevBtn.click();
     }, { passive: true });
+  })();
+
+
+  // ===== Kairi Section =====
+  (function initKairi() {
+    var cover = document.getElementById('kairi-cover');
+    var carousel = document.getElementById('kairi-carousel');
+    var tapBtn = document.getElementById('kairi-tap');
+    var noiseEl = document.getElementById('kairi-noise');
+    var backBtn = document.getElementById('kairi-back');
+    var detailBtn = document.getElementById('kairi-detail-btn');
+    var detailOverlay = document.getElementById('kairi-about-overlay');
+    var detailBackBtn = document.getElementById('kairi-about-back');
+    if (!cover || !carousel || !tapBtn || !noiseEl) return;
+
+    function noiseTransition(onPeak, onDone) {
+      var section = document.getElementById('kairi-section');
+      var w = section.offsetWidth;
+      var h = section.offsetHeight;
+      var scale = 4;
+      noiseEl.width = Math.ceil(w / scale);
+      noiseEl.height = Math.ceil(h / scale);
+      noiseEl.style.width = w + 'px';
+      noiseEl.style.height = h + 'px';
+      noiseEl.classList.remove('hidden');
+
+      var ctx = noiseEl.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      var duration = 800;
+      var start = performance.now();
+
+      function frame(now) {
+        var progress = Math.min((now - start) / duration, 1);
+        var alpha;
+        if (progress < 0.4) alpha = (progress / 0.4) * 255;
+        else if (progress < 0.6) alpha = 255;
+        else alpha = (1 - (progress - 0.6) / 0.4) * 255;
+
+        var imgData = ctx.createImageData(noiseEl.width, noiseEl.height);
+        var d = imgData.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var v = Math.random() * 255;
+          d[i] = v;
+          d[i + 1] = v;
+          d[i + 2] = v;
+          d[i + 3] = Math.floor(Math.max(0, alpha));
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        if (progress >= 0.4 && progress < 0.6 && onPeak) {
+          onPeak();
+          onPeak = null;
+        }
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
+          noiseEl.classList.add('hidden');
+          if (onDone) onDone();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    tapBtn.addEventListener('click', function () {
+      noiseTransition(function () {
+        cover.classList.add('hidden');
+        carousel.classList.remove('hidden');
+      });
+    });
+
+    if (backBtn) {
+      backBtn.addEventListener('click', function () {
+        noiseTransition(function () {
+          carousel.classList.add('hidden');
+          cover.classList.remove('hidden');
+        });
+      });
+    }
+
+    function openDetail() {
+      if (!detailOverlay) return;
+      detailOverlay.classList.remove('hidden');
+      void detailOverlay.offsetWidth;
+      detailOverlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetail() {
+      if (!detailOverlay) return;
+      detailOverlay.classList.remove('visible');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        detailOverlay.classList.add('hidden');
+      }, 500);
+    }
+
+    if (detailBtn) detailBtn.addEventListener('click', openDetail);
+    if (detailBackBtn) detailBackBtn.addEventListener('click', closeDetail);
+    if (detailOverlay) {
+      detailOverlay.addEventListener('click', function (e) {
+        if (e.target === detailOverlay) closeDetail();
+      });
+    }
   })();
 
   // ===== About Overlay =====
